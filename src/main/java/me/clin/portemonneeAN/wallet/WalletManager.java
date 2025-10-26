@@ -3,8 +3,7 @@ package me.clin.portemonneeAN.wallet;
 import me.clin.portemonneeAN.config.WalletSettings;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.milkbowl.vault.economy.Economy;
-import net.milkbowl.vault.economy.EconomyResponse;
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
@@ -29,7 +28,6 @@ import java.util.UUID;
 public final class WalletManager {
 
     private final WalletSettings settings;
-    private final Economy economy;
     private final Random random = new Random();
     private final LegacyComponentSerializer serializer = LegacyComponentSerializer.legacySection();
     private final DecimalFormat numberFormat;
@@ -40,9 +38,8 @@ public final class WalletManager {
     private final NamespacedKey claimedKey;
     private final NamespacedKey uniqueKey;
 
-    public WalletManager(Plugin plugin, WalletSettings settings, Economy economy) {
+    public WalletManager(Plugin plugin, WalletSettings settings) {
         this.settings = settings;
-        this.economy = economy;
 
         DecimalFormatSymbols symbols = DecimalFormatSymbols.getInstance(Locale.forLanguageTag("nl-NL"));
         symbols.setGroupingSeparator('.');
@@ -153,17 +150,9 @@ public final class WalletManager {
             return ClaimResult.notRevealed();
         }
 
-        if (economy == null) {
-            return ClaimResult.economyUnavailable();
-        }
-
-        EconomyResponse response = economy.depositPlayer(player, amount.doubleValue());
-        if (response == null) {
-            return ClaimResult.economyError("Onbekende fout");
-        }
-        if (!response.transactionSuccess()) {
-            String error = response.errorMessage == null ? "" : response.errorMessage;
-            return ClaimResult.economyError(error);
+    boolean executed = Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "echtgeld krijg " + amount + " " + player.getName());
+        if (!executed) {
+            return ClaimResult.commandFailed();
         }
 
         container.set(claimedKey, PersistentDataType.BYTE, (byte) 1);
@@ -182,14 +171,7 @@ public final class WalletManager {
             case SUCCESS, NOT_WALLET -> Component.empty();
             case NOT_REVEALED -> deserialize(settings.getNotRevealedMessage());
             case ALREADY_CLAIMED -> deserialize(settings.getAlreadyClaimedMessage());
-            case ECONOMY_UNAVAILABLE -> deserialize(settings.getEconomyUnavailableMessage());
-            case ECONOMY_ERROR -> {
-                String reason = result.errorMessage();
-                if (reason == null || reason.isBlank()) {
-                    yield deserialize(settings.getClaimFailedMessage());
-                }
-                yield deserialize(settings.getEconomyErrorMessage(reason));
-            }
+            case COMMAND_FAILED -> deserialize(settings.getCommandFailedMessage());
         };
 
         if (!message.equals(Component.empty())) {
@@ -257,38 +239,33 @@ public final class WalletManager {
         }
     }
 
-    public record ClaimResult(Status status, int amount, String formattedAmount, String errorMessage) {
+    public record ClaimResult(Status status, int amount, String formattedAmount) {
         enum Status {
             SUCCESS,
             NOT_WALLET,
             NOT_REVEALED,
             ALREADY_CLAIMED,
-            ECONOMY_UNAVAILABLE,
-            ECONOMY_ERROR
+            COMMAND_FAILED
         }
 
         static ClaimResult claimed(int amount, String formattedAmount) {
-            return new ClaimResult(Status.SUCCESS, amount, formattedAmount, "");
+            return new ClaimResult(Status.SUCCESS, amount, formattedAmount);
         }
 
         static ClaimResult notWallet() {
-            return new ClaimResult(Status.NOT_WALLET, 0, "", "");
+            return new ClaimResult(Status.NOT_WALLET, 0, "");
         }
 
         static ClaimResult notRevealed() {
-            return new ClaimResult(Status.NOT_REVEALED, 0, "", "");
+            return new ClaimResult(Status.NOT_REVEALED, 0, "");
         }
 
         static ClaimResult alreadyClaimed() {
-            return new ClaimResult(Status.ALREADY_CLAIMED, 0, "", "");
+            return new ClaimResult(Status.ALREADY_CLAIMED, 0, "");
         }
 
-        static ClaimResult economyUnavailable() {
-            return new ClaimResult(Status.ECONOMY_UNAVAILABLE, 0, "", "");
-        }
-
-        static ClaimResult economyError(String reason) {
-            return new ClaimResult(Status.ECONOMY_ERROR, 0, "", reason == null ? "" : reason);
+        static ClaimResult commandFailed() {
+            return new ClaimResult(Status.COMMAND_FAILED, 0, "");
         }
 
         public boolean isSuccess() {

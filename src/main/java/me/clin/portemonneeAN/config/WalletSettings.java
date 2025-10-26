@@ -24,8 +24,7 @@ public final class WalletSettings {
     private final String readyToClaimMessage;
     private final String claimedMessage;
     private final String claimFailedMessage;
-    private final String economyUnavailableMessage;
-    private final String economyErrorMessage;
+    private final String commandFailedMessage;
     private final String alreadyClaimedMessage;
     private final String notRevealedMessage;
 
@@ -39,8 +38,7 @@ public final class WalletSettings {
             String readyToClaimMessage,
             String claimedMessage,
             String claimFailedMessage,
-            String economyUnavailableMessage,
-            String economyErrorMessage,
+            String commandFailedMessage,
             String alreadyClaimedMessage,
             String notRevealedMessage
     ) {
@@ -51,10 +49,9 @@ public final class WalletSettings {
         this.revealedLore = revealedLore;
         this.revealMessage = revealMessage;
         this.readyToClaimMessage = readyToClaimMessage;
-        this.claimedMessage = claimedMessage;
-        this.claimFailedMessage = claimFailedMessage;
-        this.economyUnavailableMessage = economyUnavailableMessage;
-        this.economyErrorMessage = economyErrorMessage;
+    this.claimedMessage = claimedMessage;
+    this.claimFailedMessage = claimFailedMessage;
+    this.commandFailedMessage = commandFailedMessage;
         this.alreadyClaimedMessage = alreadyClaimedMessage;
         this.notRevealedMessage = notRevealedMessage;
     }
@@ -77,10 +74,9 @@ public final class WalletSettings {
 
         String reveal = color(config.getString("messages.reveal", "&9Je bekijkt de portemonnee en ziet &e€{amount}&9."));
         String ready = color(config.getString("messages.ready-to-claim", "&7Klik nogmaals met de portemonnee om het geld te claimen."));
-        String claimed = color(config.getString("messages.claimed", "&aJe hebt &e€{amount}&a geclaimd uit de portemonnee."));
-        String failed = color(config.getString("messages.claim-failed", "&cHet is op dit moment niet gelukt om te claimen. Neem contact op met een administrator."));
-    String economyUnavailable = color(config.getString("messages.economy-unavailable", "&cHet economysysteem is niet beschikbaar. Neem contact op met een administrator."));
-    String economyError = color(config.getString("messages.economy-error", "&cHet claimen is mislukt: {reason}"));
+    String claimed = color(config.getString("messages.claimed", "&aJe hebt &e€{amount}&a geclaimd uit de portemonnee."));
+    String failed = color(config.getString("messages.claim-failed", "&cHet is op dit moment niet gelukt om te claimen. Neem contact op met een administrator."));
+    String commandFailed = color(config.getString("messages.command-failed", "&cHet uitvoeren van de uitbetalingscommand is mislukt."));
         String alreadyClaimed = color(config.getString("messages.already-claimed", "&cDeze portemonnee is al geclaimd."));
         String notRevealed = color(config.getString("messages.not-revealed", "&cJe moet eerst het bedrag bekijken voordat je kunt claimen."));
 
@@ -94,8 +90,7 @@ public final class WalletSettings {
                 ready,
                 claimed,
                 failed,
-                economyUnavailable,
-                economyError,
+                commandFailed,
                 alreadyClaimed,
                 notRevealed
         );
@@ -191,13 +186,8 @@ public final class WalletSettings {
         return claimFailedMessage;
     }
 
-    public String getEconomyUnavailableMessage() {
-        return economyUnavailableMessage;
-    }
-
-    public String getEconomyErrorMessage(String reason) {
-        String detail = Objects.requireNonNullElse(reason, "");
-        return economyErrorMessage.replace("{reason}", detail);
+    public String getCommandFailedMessage() {
+        return commandFailedMessage;
     }
 
     public String getAlreadyClaimedMessage() {

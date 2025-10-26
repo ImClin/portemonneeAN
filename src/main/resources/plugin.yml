@@ -3,8 +3,6 @@ version: '1.0-SNAPSHOT'
 main: me.clin.portemonneeAN.PortemonneeAN
 api-version: '1.21'
 softdepend:
-  - Vault
-  - Essentials
   - ItemsAdder
 commands:
   portemonnee:

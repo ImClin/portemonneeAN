@@ -11,7 +11,6 @@ messages:
   ready-to-claim: "&7Klik nogmaals met de portemonnee om het geld te claimen."
   claimed: "&aJe hebt &e€{amount}&a geclaimd uit de portemonnee."
   claim-failed: "&cHet is op dit moment niet gelukt om te claimen. Neem contact op met een administrator."
-  economy-unavailable: "&cHet economysysteem is niet beschikbaar. Neem contact op met een administrator."
-  economy-error: "&cHet claimen is mislukt: {reason}"
+  command-failed: "&cHet uitvoeren van de uitbetalingscommand is mislukt."
   already-claimed: "&cDeze portemonnee is al geclaimd."
   not-revealed: "&cJe moet eerst het bedrag bekijken voordat je kunt claimen."
