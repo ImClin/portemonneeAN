@@ -1,10 +1,6 @@
-# PortemonneeAN
-
-Kleine maar fijne plugin die ik voor onze Minetopia-achtige server heb gebouwd. Spelers kunnen speciale portemonnees vinden (via crates, pets, events – wat we maar willen) en daarmee een random bedrag claimen. Geen command-gedoe: gewoon de portemonnee in de hand houden, rechtsklikken om eerst het bedrag te zien en nogmaals klikken om het op je EssentialsX-bank te storten.
-
 ## Wat doet het?
 - Genereert een willekeurig bedrag tussen het ingestelde minimum en maximum zodra een speler de portemonnee bekijkt.
-- Laat meteen zien hoeveel erin zit (chat + aangepaste lore) zodat het een beetje spannend blijft.
+- Laat meteen zien hoeveel erin zit (chat + aangepaste lore).
 - Stort het bedrag op de gewone server-economie (via Vault/EssentialsX) wanneer je opnieuw klikt.
 - Houdt bij of een portemonnee al geclaimd is met behulp van de PersistentDataContainer, zodat dupes geen kans krijgen.
 
@@ -35,8 +31,6 @@ messages:
   not-revealed: "&cJe moet eerst het bedrag bekijken voordat je kunt claimen."
 ```
 
-Tip: zodra ItemsAdder klaarstaat, vervang je het test-item in de command-code door het definitieve item. Tot die tijd kun je `/portemonnee give` gebruiken om te testen.
-
 ## Build & test
 1. `./gradlew build`
 2. De jar verschijnt in `build/libs/`
@@ -44,7 +38,4 @@ Tip: zodra ItemsAdder klaarstaat, vervang je het test-item in de command-code do
 
 ## TODO / ideeën
 - ItemsAdder item + texture koppelen zodra we de definitieve asset hebben.
-- GUI toevoegen voor het logboek van geclaimde portemonnees (handig voor staff).
-- Misschien een admin-command om portemonnees in bulk te genereren.
-
 Voor nu doet hij precies wat we nodig hebben: wallet vinden, bedrag zien, claimen en klaar. 🎉
