@@ -2,3 +2,16 @@ name: portemonneeAN
 version: '1.0-SNAPSHOT'
 main: me.clin.portemonneeAN.PortemonneeAN
 api-version: '1.21'
+softdepend:
+  - Vault
+  - Essentials
+  - ItemsAdder
+commands:
+  portemonnee:
+    description: Geeft toegang tot testportemonnees.
+    permission: portemonnee.command
+    usage: "/<command> give [speler]"
+permissions:
+  portemonnee.command:
+    description: Toegang tot de portemonnee testcommand.
+    default: op

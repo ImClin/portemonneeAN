@@ -1,0 +1,17 @@
+wallet:
+  min-amount: 1
+  max-amount: 1000
+  display-name: "&6Portemonnee"
+  unrevealed-lore:
+    - "&7Open de portemonnee om het geldbedrag te bekijken."
+  revealed-lore:
+    - "&7Je bekijkt de portemonnee en ziet &e€{amount}&7."
+messages:
+  reveal: "&9Je bekijkt de portemonnee en ziet &e€{amount}&9."
+  ready-to-claim: "&7Klik nogmaals met de portemonnee om het geld te claimen."
+  claimed: "&aJe hebt &e€{amount}&a geclaimd uit de portemonnee."
+  claim-failed: "&cHet is op dit moment niet gelukt om te claimen. Neem contact op met een administrator."
+  economy-unavailable: "&cHet economysysteem is niet beschikbaar. Neem contact op met een administrator."
+  economy-error: "&cHet claimen is mislukt: {reason}"
+  already-claimed: "&cDeze portemonnee is al geclaimd."
+  not-revealed: "&cJe moet eerst het bedrag bekijken voordat je kunt claimen."
