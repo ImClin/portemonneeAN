@@ -1,9 +1,3 @@
-## Wat doet het?
-- Genereert een willekeurig bedrag tussen het ingestelde minimum en maximum zodra een speler de portemonnee bekijkt.
-- Laat meteen zien hoeveel erin zit (chat + aangepaste lore).
-- Stort het bedrag op de gewone server-economie (via Vault/EssentialsX) wanneer je opnieuw klikt.
-- Houdt bij of een portemonnee al geclaimd is met behulp van de PersistentDataContainer, zodat dupes geen kans krijgen.
-
 ## Requirements
 - Paper 1.21.4 (of iets dat compatibel is met Paper plugins).
 - Vault + EssentialsX Economy (of een andere Vault-provider).
@@ -35,7 +29,3 @@ messages:
 1. `./gradlew build`
 2. De jar verschijnt in `build/libs/`
 3. Plaats de jar in de server `plugins` map en start de server. Vergeet niet Vault/EssentialsX actief te hebben.
-
-## TODO / ideeën
-- ItemsAdder item + texture koppelen zodra we de definitieve asset hebben.
-Voor nu doet hij precies wat we nodig hebben: wallet vinden, bedrag zien, claimen en klaar. 🎉
