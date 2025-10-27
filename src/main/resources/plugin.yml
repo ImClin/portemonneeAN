@@ -6,10 +6,13 @@ softdepend:
   - ItemsAdder
 commands:
   portemonnee:
-    description: Geeft toegang tot testportemonnees.
+    description: Beheer en geef portemonnees.
     permission: portemonnee.command
-    usage: "/<command> give [speler]"
+    usage: "/<command> give [speler] | admingui"
 permissions:
   portemonnee.command:
     description: Toegang tot de portemonnee testcommand.
+    default: op
+  portemonnee.admin:
+    description: Toegang tot de admin GUI voor cash biljetten.
     default: op

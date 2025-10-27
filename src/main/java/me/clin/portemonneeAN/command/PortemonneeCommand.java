@@ -1,5 +1,6 @@
 package me.clin.portemonneeAN.command;
 
+import me.clin.portemonneeAN.PortemonneeAN;
 import me.clin.portemonneeAN.wallet.WalletManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -20,18 +21,29 @@ import java.util.List;
  */
 public final class PortemonneeCommand implements CommandExecutor, TabCompleter {
 
-    private final WalletManager walletManager;
+    private final PortemonneeAN plugin;
 
-    public PortemonneeCommand(WalletManager walletManager) {
-        this.walletManager = walletManager;
+    public PortemonneeCommand(PortemonneeAN plugin) {
+        this.plugin = plugin;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (args.length == 0 || !args[0].equalsIgnoreCase("give")) {
-            sender.sendMessage(Component.text("Gebruik: /" + label + " give [speler]"));
+        if (args.length == 0) {
+            sender.sendMessage(Component.text("Gebruik: /" + label + " give [speler] | /" + label + " admingui"));
             return true;
         }
+
+        if (args[0].equalsIgnoreCase("admingui")) {
+            return handleAdminGui(sender, label);
+        }
+
+        if (!args[0].equalsIgnoreCase("give")) {
+            sender.sendMessage(Component.text("Onbekende subcommand. Gebruik: /" + label + " give [speler] | /" + label + " admingui"));
+            return true;
+        }
+
+        WalletManager walletManager = plugin.getWalletManager();
 
         Player target;
         if (args.length >= 2) {
@@ -66,6 +78,9 @@ public final class PortemonneeCommand implements CommandExecutor, TabCompleter {
             if ("give".startsWith(args[0].toLowerCase())) {
                 options.add("give");
             }
+            if ("admingui".startsWith(args[0].toLowerCase())) {
+                options.add("admingui");
+            }
             return options;
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("give")) {
@@ -78,5 +93,19 @@ public final class PortemonneeCommand implements CommandExecutor, TabCompleter {
             return names;
         }
         return Collections.emptyList();
+    }
+
+    private boolean handleAdminGui(CommandSender sender, String label) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(Component.text("Alleen spelers kunnen dit command gebruiken."));
+            return true;
+        }
+        if (!player.hasPermission("portemonnee.admin")) {
+            player.sendMessage(Component.text("Je hebt geen toestemming voor dit command."));
+            return true;
+        }
+
+        plugin.getAdminMenu().open(player);
+        return true;
     }
 }

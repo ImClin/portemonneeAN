@@ -14,3 +14,6 @@ messages:
   command-failed: "&cHet uitvoeren van de uitbetalingscommand is mislukt."
   already-claimed: "&cDeze portemonnee is al geclaimd."
   not-revealed: "&cJe moet eerst het bedrag bekijken voordat je kunt claimen."
+
+# Wordt automatisch gevuld via /portemonnee admingui
+cash-items: {}
