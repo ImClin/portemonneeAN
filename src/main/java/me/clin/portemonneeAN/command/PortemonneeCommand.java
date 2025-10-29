@@ -4,7 +4,6 @@ import me.clin.portemonneeAN.PortemonneeAN;
 import me.clin.portemonneeAN.wallet.WalletManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -59,8 +58,7 @@ public final class PortemonneeCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        ItemStack baseItem = new ItemStack(Material.NETHER_STAR);
-        ItemStack wallet = walletManager.createWalletItem(baseItem);
+    ItemStack wallet = walletManager.createConfiguredWalletItem();
 
         target.getInventory().addItem(wallet).values().forEach(overflow -> target.getWorld().dropItemNaturally(target.getLocation(), overflow));
 

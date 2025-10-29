@@ -5,6 +5,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -15,6 +16,8 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayDeque;
@@ -33,11 +36,16 @@ import java.util.UUID;
  */
 public final class WalletManager {
 
+    private final Plugin plugin;
     private final Random random = new Random();
     private final LegacyComponentSerializer serializer = LegacyComponentSerializer.legacySection();
     private final DecimalFormat numberFormat;
     private WalletSettings settings;
     private final EnumMap<WalletDenomination, ItemStack> cashTemplates = new EnumMap<>(WalletDenomination.class);
+    private boolean itemsAdderMissingWarned;
+    private boolean itemsAdderItemWarned;
+    private Method itemsAdderGetInstance;
+    private Method itemsAdderGetItemStack;
 
     private final NamespacedKey walletKey;
     private final NamespacedKey amountKey;
@@ -46,13 +54,18 @@ public final class WalletManager {
     private final NamespacedKey uniqueKey;
 
     public WalletManager(Plugin plugin, WalletSettings settings, Map<WalletDenomination, ItemStack> templates) {
+        this.plugin = plugin;
         DecimalFormatSymbols symbols = DecimalFormatSymbols.getInstance(Locale.forLanguageTag("nl-NL"));
         symbols.setGroupingSeparator('.');
         symbols.setDecimalSeparator(',');
         this.numberFormat = new DecimalFormat("#,##0", symbols);
 
-        this.settings = settings;
-        setCashTemplates(templates);
+    this.settings = settings;
+    this.itemsAdderMissingWarned = false;
+    this.itemsAdderItemWarned = false;
+    this.itemsAdderGetInstance = null;
+    this.itemsAdderGetItemStack = null;
+    setCashTemplates(templates);
 
         this.walletKey = new NamespacedKey(plugin, "wallet");
         this.amountKey = new NamespacedKey(plugin, "wallet_amount");
@@ -62,7 +75,7 @@ public final class WalletManager {
     }
 
     public ItemStack createWalletItem(ItemStack baseStack) {
-        ItemStack item = baseStack.clone();
+        ItemStack item = resolveBaseStack(baseStack);
         item.setAmount(1);
 
         ItemMeta meta = item.getItemMeta();
@@ -82,6 +95,10 @@ public final class WalletManager {
 
         item.setItemMeta(meta);
         return item;
+    }
+
+    public ItemStack createConfiguredWalletItem() {
+        return createWalletItem(null);
     }
 
     public boolean isWallet(ItemStack item) {
@@ -261,8 +278,12 @@ public final class WalletManager {
     }
 
     public void reload(WalletSettings newSettings, Map<WalletDenomination, ItemStack> templates) {
-        this.settings = newSettings;
-        setCashTemplates(templates);
+    this.settings = newSettings;
+    this.itemsAdderMissingWarned = false;
+    this.itemsAdderItemWarned = false;
+    this.itemsAdderGetInstance = null;
+    this.itemsAdderGetItemStack = null;
+    setCashTemplates(templates);
     }
 
     public void setCashTemplates(Map<WalletDenomination, ItemStack> templates) {
@@ -281,6 +302,84 @@ public final class WalletManager {
     public ItemStack getCashTemplate(WalletDenomination denomination) {
         ItemStack template = cashTemplates.get(denomination);
         return template == null ? null : template.clone();
+    }
+
+    private ItemStack resolveBaseStack(ItemStack baseStack) {
+        if (baseStack != null && baseStack.getType() != Material.AIR) {
+            return baseStack.clone();
+        }
+
+        ItemStack fromItemsAdder = loadItemsAdderStack();
+        if (fromItemsAdder != null) {
+            return fromItemsAdder;
+        }
+
+        return new ItemStack(settings.getBaseMaterial());
+    }
+
+    private ItemStack loadItemsAdderStack() {
+        String itemId = settings.getItemsAdderItemId();
+        if (itemId == null || itemId.isBlank()) {
+            return null;
+        }
+
+        if (!plugin.getServer().getPluginManager().isPluginEnabled("ItemsAdder")) {
+            warnItemsAdderMissing(itemId);
+            return null;
+        }
+
+        if (!ensureItemsAdderMethods()) {
+            warnItemsAdderMissing(itemId);
+            return null;
+        }
+
+        try {
+            Object customStack = itemsAdderGetInstance.invoke(null, itemId);
+            if (customStack == null) {
+                warnItemsAdderItemMissing(itemId);
+                return null;
+            }
+            Object itemStack = itemsAdderGetItemStack.invoke(customStack);
+            if (itemStack instanceof ItemStack stack) {
+                return stack.clone();
+            }
+            warnItemsAdderItemMissing(itemId);
+        } catch (IllegalAccessException | InvocationTargetException ex) {
+            if (!itemsAdderItemWarned) {
+                plugin.getLogger().warning("Kon ItemsAdder item '" + itemId + "' niet laden: " + ex.getMessage());
+                itemsAdderItemWarned = true;
+            }
+        }
+        return null;
+    }
+
+    private boolean ensureItemsAdderMethods() {
+        if (itemsAdderGetInstance != null && itemsAdderGetItemStack != null) {
+            return true;
+        }
+
+        try {
+            Class<?> clazz = Class.forName("dev.lone.itemsadder.api.CustomStack");
+            itemsAdderGetInstance = clazz.getMethod("getInstance", String.class);
+            itemsAdderGetItemStack = clazz.getMethod("getItemStack");
+            return true;
+        } catch (ClassNotFoundException | NoSuchMethodException ex) {
+            return false;
+        }
+    }
+
+    private void warnItemsAdderMissing(String itemId) {
+        if (!itemsAdderMissingWarned) {
+            plugin.getLogger().warning("ItemsAdder item '" + itemId + "' is geconfigureerd, maar ItemsAdder is niet geladen. Gebruik fallback materiaal.");
+            itemsAdderMissingWarned = true;
+        }
+    }
+
+    private void warnItemsAdderItemMissing(String itemId) {
+        if (!itemsAdderItemWarned) {
+            plugin.getLogger().warning("ItemsAdder item '" + itemId + "' niet gevonden. Gebruik fallback materiaal.");
+            itemsAdderItemWarned = true;
+        }
     }
 
     private void distributeCash(Player player, List<ItemStack> cashItems) {

@@ -1,6 +1,11 @@
 wallet:
   min-amount: 1
   max-amount: 1000
+  base:
+    # ItemsAdder item id in de vorm namespace:item. Laat leeg om het fallback materiaal te gebruiken.
+    itemsadder-id: ""
+    # Materiaal dat gebruikt wordt als ItemsAdder niet beschikbaar is.
+    material: PAPER
   display-name: "&6Portemonnee"
   unrevealed-lore:
     - "&7Open de portemonnee om het geldbedrag te bekijken."

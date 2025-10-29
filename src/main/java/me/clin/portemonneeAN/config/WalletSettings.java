@@ -1,5 +1,6 @@
 package me.clin.portemonneeAN.config;
 
+import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.ArrayList;
@@ -17,6 +18,8 @@ public final class WalletSettings {
 
     private final int minAmount;
     private final int maxAmount;
+    private final Material baseMaterial;
+    private final String itemsAdderItemId;
     private final String displayName;
     private final List<String> unrevealedLore;
     private final List<String> revealedLore;
@@ -31,6 +34,8 @@ public final class WalletSettings {
     private WalletSettings(
             int minAmount,
             int maxAmount,
+            Material baseMaterial,
+            String itemsAdderItemId,
             String displayName,
             List<String> unrevealedLore,
             List<String> revealedLore,
@@ -44,14 +49,16 @@ public final class WalletSettings {
     ) {
         this.minAmount = minAmount;
         this.maxAmount = maxAmount;
+        this.baseMaterial = baseMaterial;
+        this.itemsAdderItemId = itemsAdderItemId;
         this.displayName = displayName;
         this.unrevealedLore = unrevealedLore;
         this.revealedLore = revealedLore;
         this.revealMessage = revealMessage;
         this.readyToClaimMessage = readyToClaimMessage;
-    this.claimedMessage = claimedMessage;
-    this.claimFailedMessage = claimFailedMessage;
-    this.commandFailedMessage = commandFailedMessage;
+        this.claimedMessage = claimedMessage;
+        this.claimFailedMessage = claimFailedMessage;
+        this.commandFailedMessage = commandFailedMessage;
         this.alreadyClaimedMessage = alreadyClaimedMessage;
         this.notRevealedMessage = notRevealedMessage;
     }
@@ -67,6 +74,12 @@ public final class WalletSettings {
             max = min;
         }
 
+        Material baseMaterial = parseMaterial(config.getString("wallet.base.material", "PAPER"));
+        String itemsAdderItemId = config.getString("wallet.base.itemsadder-id", "");
+        if (itemsAdderItemId != null) {
+            itemsAdderItemId = itemsAdderItemId.trim();
+        }
+
         String displayName = color(config.getString("wallet.display-name", "&6Portemonnee"));
 
         List<String> unrevealedLore = color(config.getStringList("wallet.unrevealed-lore"));
@@ -74,15 +87,17 @@ public final class WalletSettings {
 
         String reveal = color(config.getString("messages.reveal", "&9Je bekijkt de portemonnee en ziet &e€{amount}&9."));
         String ready = color(config.getString("messages.ready-to-claim", "&7Klik nogmaals met de portemonnee om het geld te claimen."));
-    String claimed = color(config.getString("messages.claimed", "&aJe hebt &e€{amount}&a geclaimd uit de portemonnee."));
-    String failed = color(config.getString("messages.claim-failed", "&cHet is op dit moment niet gelukt om te claimen. Neem contact op met een administrator."));
-    String commandFailed = color(config.getString("messages.command-failed", "&cHet uitvoeren van de uitbetalingscommand is mislukt."));
+        String claimed = color(config.getString("messages.claimed", "&aJe hebt &e€{amount}&a geclaimd uit de portemonnee."));
+        String failed = color(config.getString("messages.claim-failed", "&cHet is op dit moment niet gelukt om te claimen. Neem contact op met een administrator."));
+        String commandFailed = color(config.getString("messages.command-failed", "&cHet uitvoeren van de uitbetalingscommand is mislukt."));
         String alreadyClaimed = color(config.getString("messages.already-claimed", "&cDeze portemonnee is al geclaimd."));
         String notRevealed = color(config.getString("messages.not-revealed", "&cJe moet eerst het bedrag bekijken voordat je kunt claimen."));
 
         return new WalletSettings(
                 min,
                 max,
+                baseMaterial,
+                itemsAdderItemId,
                 displayName,
                 unrevealedLore,
                 revealedLore,
@@ -97,6 +112,14 @@ public final class WalletSettings {
     }
 
     private static final Pattern COLOR_PATTERN = Pattern.compile("&([0-9a-fk-orx])", Pattern.CASE_INSENSITIVE);
+
+    private static Material parseMaterial(String name) {
+        if (name == null || name.isBlank()) {
+            return Material.PAPER;
+        }
+        Material material = Material.matchMaterial(name.trim(), true);
+        return material != null ? material : Material.PAPER;
+    }
 
     private static String color(String input) {
         String text = Objects.requireNonNullElse(input, "");
@@ -151,6 +174,14 @@ public final class WalletSettings {
 
     public int getMaxAmount() {
         return maxAmount;
+    }
+
+    public Material getBaseMaterial() {
+        return baseMaterial;
+    }
+
+    public String getItemsAdderItemId() {
+        return itemsAdderItemId;
     }
 
     public String getDisplayName() {
